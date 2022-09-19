@@ -12,7 +12,13 @@
 // UTILITIES
 
 string pointInfoGen(Point *pnt, const int &roomLength, char curDrc) {
-    return "(" + std::to_string(pnt->roomIdx)
+    if (curDrc - '0' >= 0 && '9' - curDrc >= 0){
+        return "(" + std::to_string((int) (pnt->roomIdx - '0'))
+               + "," + std::to_string((pnt->idx / roomLength) )
+               + "," + std::to_string( (pnt->idx % roomLength) )
+               + ",p)";
+    }else
+    return "(" + std::to_string((int) (pnt->roomIdx - '0'))
            + "," + std::to_string((pnt->idx / roomLength) )
            + "," + std::to_string( (pnt->idx % roomLength) )
            + "," + curDrc + ")";
@@ -87,7 +93,7 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
         // first, check if Pipe
         Point *nextPosIfPipe = nullptr;
         if ( (curPos->pnt_type - '0' >= 0) && ('9' - curPos->pnt_type >= 0) ){
-            int pipeTo = atoi(&(curPos->pnt_type));
+            int pipeTo = (int) curPos->pnt_type - '0';
             if ( pipeTo < roomNum) {
                 nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
                 if (PushDecisionStack(nextPosIfPipe, &findCountess,totalTiles,visitedStack) == 1) {
@@ -100,7 +106,7 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
             }
         }
         else{
-            int curRoomNum = atoi(&(curPos->roomIdx));
+            int curRoomNum = (int) curPos->roomIdx - '0';
             unsigned int curPntIdx = curPos->idx;
             Point *NorthP = takeOneDirection(castle,curRoomNum,curPntIdx,'n',roomLength);
             Point *EastP = takeOneDirection(castle,curRoomNum,curPntIdx,'e',roomLength);
@@ -177,11 +183,7 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
             nextPnt->direction = nextDirection;
             break;
         }
-
-        if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
-            nextPnt->pnt_type = 'P';
-        }else
-            nextPnt->pnt_type = 'V';
+        nextPnt->pnt_type = 'V';
 
         nextToNext = nextPnt->direction;  // the direction after nextPnt should take
         nextPnt->direction = nextDirection; // this is the direction this prev point should take (reason this)
@@ -252,16 +254,17 @@ void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int
         }
         auto *info = new string;
         *info = pointInfoGen(prevPnt, roomLength, curPnt->direction);
-        printf("%s\n",info->c_str());
+        // debug
+        // printf("%s\n",info->c_str());
         listOutput.push(info);
         curPnt = prevPnt; /// update to continue back-tracking
     }
-//    while(!listOutput.empty()){
-//        string *e = listOutput.top();
-//        printf("%s\n",e->c_str());
-//        delete e;
-//        listOutput.pop();
-//    }
+    while(!listOutput.empty()){
+        string *e = listOutput.top();
+        printf("%s\n",e->c_str());
+        delete e;
+        listOutput.pop();
+    }
 
 }
 

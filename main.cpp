@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
         if (!listOutputMode) {
-            printMap(&castle, roomNum, roomLength);
+            //printMap(&castle, roomNum, roomLength);
             printMapStack(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
         } else{
             printListStack(findCountess,&castle,roomLength);

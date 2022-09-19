@@ -51,7 +51,7 @@ int PushDecisionStack(Point *nextPossiblePos, int *foundCountess, int *tilesDisc
         *foundCountess = 1;
         return 1;
     }
-    else if (nextPossiblePos->direction != '\0' &&
+    else if (nextPossiblePos->direction == '\0' &&
              nextPossiblePos->pnt_type != '#' &&
              nextPossiblePos->pnt_type != '!'){
         visitedStack->push(nextPossiblePos);
@@ -61,9 +61,9 @@ int PushDecisionStack(Point *nextPossiblePos, int *foundCountess, int *tilesDisc
     else
         return 0;
 }
-Point* findRoute_stack(stack<Point*> *visitedStack, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
-                     const int &roomLength, const int &roomNum){
-    int totalTiles = 1;
+Point *
+findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
+                const int &roomLength, const int &roomNum, int *totalTiles) {
     int  findCountess = 0;
     // push start to visitedStack
     Point *start = &((*castle)[startRoom][startIdx]);
@@ -80,7 +80,7 @@ Point* findRoute_stack(stack<Point*> *visitedStack, vector<vector<Point>> *castl
             int pipeTo = atoi(&(curPos->pnt_type));
             if ( pipeTo < roomNum) {
                 nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
-                if (PushDecisionStack(nextPosIfPipe, &findCountess,&totalTiles,visitedStack) == 1) {
+                if (PushDecisionStack(nextPosIfPipe, &findCountess,totalTiles,visitedStack) == 1) {
                     nextPosIfPipe->direction = curPos->roomIdx;
                 }
                 if (findCountess == 1) { /// find countess, return that point
@@ -100,26 +100,26 @@ Point* findRoute_stack(stack<Point*> *visitedStack, vector<vector<Point>> *castl
 
 
             // North accessible
-            if (PushDecisionStack(NorthP, &findCountess, &totalTiles, visitedStack) == 1){
+            if (PushDecisionStack(NorthP, &findCountess, totalTiles, visitedStack) == 1){
                 NorthP->direction = 'n';
                 if (findCountess == 1){
                     return NorthP;
                 }
 
             }
-            if (PushDecisionStack(EastP, &findCountess, &totalTiles, visitedStack) == 1){
+            if (PushDecisionStack(EastP, &findCountess, totalTiles, visitedStack) == 1){
                 EastP->direction = 'e';
                 if (findCountess == 1){
                     return EastP;
                 }
             }
-            if (PushDecisionStack(SouthP, &findCountess, &totalTiles, visitedStack) == 1){
+            if (PushDecisionStack(SouthP, &findCountess, totalTiles, visitedStack) == 1){
                 SouthP->direction = 's';
                 if (findCountess == 1){
                     return SouthP;
                 }
             }
-            if (PushDecisionStack(WestP, &findCountess, &totalTiles, visitedStack) == 1){
+            if (PushDecisionStack(WestP, &findCountess, totalTiles, visitedStack) == 1){
                 WestP->direction = 'w';
                 if (findCountess == 1){
                     return WestP;
@@ -139,7 +139,7 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
 
     char nextDirection = countessLct->direction;
     char nextToNext;
-    while(curPnt->pnt_type != 'S'){
+    while(true){
         if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
             nextPnt = &( (*castle)[atoi(&(curPnt->direction))][curPnt->idx] );
         }
@@ -158,6 +158,10 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
         else{
             std::cerr << "failure in Stack back-tracking! Point from no where !\n";
             exit(1);
+        }
+        if (nextPnt->pnt_type == 'S'){
+            nextPnt->direction = nextDirection;
+            break;
         }
         nextPnt->pnt_type = 'V';
         nextToNext = nextPnt->direction;  // the direction after nextPnt should take
@@ -178,7 +182,7 @@ void printMapStack(Point* countessPnt, vector<vector<Point>> *castle, const int&
                 printf("C");
             }
             // point on the route !!!
-            else if ( curPoint->pnt_type == 'V' ){
+            else if ( curPoint->pnt_type == 'V' || curPoint->pnt_type == 'S'){
                 // from Pipe or it itself is a warp pipe will engage a "p" CHECK!!!
                 if ( curPoint->direction - '0' >= 0 && '9' - curPoint->direction >= 0 ){
                     printf("p");
@@ -188,11 +192,8 @@ void printMapStack(Point* countessPnt, vector<vector<Point>> *castle, const int&
                 }
             }
             // point not on the route !!
-            else if (curPoint->pnt_type == num){
-                printf("%d",curPoint->pipeNumTo);
-            }
             else{
-                printf("%s",Stype[curPoint->pnt_type]);
+                printf("%c",curPoint->pnt_type);
             }
             if (pIdx % roomLength == roomLength - 1)
                 printf("\n");

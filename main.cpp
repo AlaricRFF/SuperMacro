@@ -140,18 +140,16 @@ int main(int argc, char *argv[]) {
     }
 //     NO ERROR, PROCEED
 //     go to stack mode
-    if (isStackNotQueue){
-        stack<Point *> visitedStack, backRoute;
-        // no route was found
-        if (!findRoute_stack(&visitedStack, &castle, startRoom, startIdx, roomLength, roomNum)){
+    if (isStackNotQueue) {
+        int totalTiles = 1;
+        stack<Point *> visitedStack;
+        Point *findCountess = findRoute_stack(&visitedStack, &castle, startRoom, startIdx, roomLength, roomNum, &totalTiles);
+        if (findCountess == nullptr) {
+            printf("No solution, %d tiles discovered.\n", totalTiles);
             return 0;
         }
-        backTrackingStack(&backRoute, &visitedStack);
-        if (!listOutputMode) {
-            printf("Start in room %d, row %d, column %d\n", startRoom, (startIdx / roomLength), (startIdx % roomLength));
-            printMapStack(&castle,roomNum);
-        }
-
+        printMapStack(findCountess,&castle,roomNum,startRoom,startIdx,roomLength);
+    }
 //        else{ // list mode
 //            printListStack(&backRoute,roomLength);
 //        }

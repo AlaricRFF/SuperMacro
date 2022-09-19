@@ -155,26 +155,22 @@ int main(int argc, char *argv[]) {
             printListStack(findCountess,&castle,roomLength);
         }
     }
-//        else{ // list mode
-//            printListStack(&backRoute,roomLength);
-//        }
-//    }
-//    else
-//    { // go to queue mode
-//        int totalTiles = 1;
-//        queue<Point*> visitedQueue;
-//
-//        Point *countessLct = findRoute_queue(&visitedQueue, &castle, startRoom, startIdx, roomLength, roomNum, &totalTiles);
-//        if (countessLct == nullptr){
-//            printf("No solution, %d tiles discovered.\n", totalTiles);
-//        }
-//        else if (!listOutputMode){
-//            printMapQueue(countessLct,&castle,roomNum,startRoom,startIdx);
-//        }
-//        else{
-//            printListQueue(countessLct,&castle);
-//        }
-//    }
+    else { // queue mode
+        int totalTiles = 1;
+        queue<Point *> visitedQueue;
+
+        Point *findCountess = findRoute_queue(&visitedQueue, &castle, startRoom, startIdx, roomLength, roomNum, &totalTiles);
+        if (findCountess == nullptr) {
+            printf("No solution, %d tiles discovered.\n", totalTiles);
+            return 0;
+        }
+        if (!listOutputMode) {
+            //printMap(&castle, roomNum, roomLength);
+            printMapQueue(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
+        } else{
+            printListQueue(findCountess,&castle,roomLength);
+        }
+    }
 
 
 

@@ -27,4 +27,14 @@ void printMapStack(Point* countessPnt, vector<vector<Point>> *castle,
 void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength);
 // END STACK
 
+// BEGIN QUEUE
+int PushDecisionQueue(Point *nextPossiblePos, int *foundCountess, int *tilesDiscovered, queue<Point *> *visitedQueue);
+Point * findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
+                const int &roomLength, const int &roomNum, int *totalTiles);
+void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength);
+void printMapQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum,
+                   const int& startRoom, const int& startIdx, const int& roomLength);
+void printListQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength);
+// END QUEUE
+
 #endif //SUPERMACRO_ROUTINGNEW_H

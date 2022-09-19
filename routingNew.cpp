@@ -77,6 +77,7 @@ int PushDecisionStack(Point *nextPossiblePos, int *foundCountess, int *tilesDisc
     else
         return 0;
 }
+
 Point *
 findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
                 const int &roomLength, const int &roomNum, int *totalTiles) {
@@ -269,3 +270,213 @@ void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int
 }
 
 // END STACK
+
+// BEGIN QUEUE
+int PushDecisionQueue(Point *nextPossiblePos, int *foundCountess, int *tilesDiscovered, queue<Point *> *visitedQueue) {
+    if (nextPossiblePos == nullptr){
+        return -1;
+    }
+    if (nextPossiblePos->pnt_type == 'C'){
+        *foundCountess = 1;
+        return 1;
+    }
+    else if (nextPossiblePos->direction == '\0' &&
+             nextPossiblePos->pnt_type != '#' &&
+             nextPossiblePos->pnt_type != '!'){
+        visitedQueue->push(nextPossiblePos);
+        (*tilesDiscovered) ++;
+        return 1;
+    }
+    else
+        return 0;
+}
+
+Point *
+findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
+                const int &roomLength, const int &roomNum, int *totalTiles) {
+    int  findCountess = 0;
+    // push start to visitedStack
+    Point *start = &((*castle)[startRoom][startIdx]);
+    visitedQueue->push( start  );
+    Point *curPos = start;
+    start->direction = 'S';
+    // Start search through the castle
+    while (true){
+        curPos = visitedQueue->front();
+        visitedQueue->pop();         // WILL the INFO of this point be DELETED after popping ???
+        // first, check if Pipe
+        Point *nextPosIfPipe = nullptr;
+        if ( (curPos->pnt_type - '0' >= 0) && ('9' - curPos->pnt_type >= 0) ){
+            int pipeTo = (int) curPos->pnt_type - '0';
+            if ( pipeTo < roomNum) {
+                nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
+                if (PushDecisionQueue(nextPosIfPipe, &findCountess,totalTiles,visitedQueue) == 1) {
+                    nextPosIfPipe->direction = curPos->roomIdx;
+                }
+                if (findCountess == 1) { /// find countess, return that point
+                    // IMPORTANT: already updated in PushDecisionQueue !
+                    return nextPosIfPipe;
+                }
+            }
+        }
+        else{
+            int curRoomNum = (int) curPos->roomIdx - '0';
+            unsigned int curPntIdx = curPos->idx;
+            Point *NorthP = takeOneDirection(castle,curRoomNum,curPntIdx,'n',roomLength);
+            Point *EastP = takeOneDirection(castle,curRoomNum,curPntIdx,'e',roomLength);
+            Point *SouthP = takeOneDirection(castle,curRoomNum,curPntIdx,'s',roomLength);
+            Point *WestP = takeOneDirection(castle,curRoomNum,curPntIdx,'w',roomLength);
+
+
+            // North accessible
+            if (PushDecisionQueue(NorthP, &findCountess, totalTiles, visitedQueue) == 1){
+                NorthP->direction = 'n';
+                if (findCountess == 1){
+                    return NorthP;
+                }
+
+            }
+            if (PushDecisionQueue(EastP, &findCountess, totalTiles, visitedQueue) == 1){
+                EastP->direction = 'e';
+                if (findCountess == 1){
+                    return EastP;
+                }
+            }
+            if (PushDecisionQueue(SouthP, &findCountess, totalTiles, visitedQueue) == 1){
+                SouthP->direction = 's';
+                if (findCountess == 1){
+                    return SouthP;
+                }
+            }
+            if (PushDecisionQueue(WestP, &findCountess, totalTiles, visitedQueue) == 1){
+                WestP->direction = 'w';
+                if (findCountess == 1){
+                    return WestP;
+                }
+            }
+        }
+        if (visitedQueue->empty()){
+            return nullptr;
+        }
+    }
+}
+
+void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength){
+    Point *curPnt = countessLct;
+    Point *nextPnt = nullptr;
+
+    char nextDirection = countessLct->direction;
+    char nextToNext;
+    while(true){
+        if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
+            int a = nextDirection  - '0';
+            nextPnt = &( (*castle)[a][curPnt->idx] );
+        }
+        else if(nextDirection == 'n'){
+            int a = curPnt->roomIdx - '0';
+            nextPnt = & ( (*castle)[ a ][curPnt->idx + roomLength] );
+        }
+        else if (nextDirection == 'e'){
+            int a = (int) (curPnt->roomIdx - '0');
+            nextPnt = &( (*castle)[ a ][curPnt->idx - 1] );
+        }
+        else if (nextDirection == 's'){
+            int a = (int) (curPnt->roomIdx - '0');
+            nextPnt = &( (*castle)[ a ][curPnt->idx - roomLength] );
+        }
+        else if (nextDirection == 'w'){
+            int a = (int) (curPnt->roomIdx - '0');
+            nextPnt = &( (*castle)[ a ][curPnt->idx + 1] );
+        }
+        else{
+            std::cerr << "failure in Queue back-tracking! Point from no where !\n";
+            exit(1);
+        }
+        if (nextPnt->pnt_type == 'S'){
+            nextPnt->direction = nextDirection;
+            break;
+        }
+        nextPnt->pnt_type = 'V';
+
+        nextToNext = nextPnt->direction;  // the direction after nextPnt should take
+        nextPnt->direction = nextDirection; // this is the direction this prev point should take (reason this)
+        nextDirection = nextToNext;
+        curPnt = nextPnt; /// update curPnt to the next loop
+    }
+}
+
+void printMapQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum, const int& startRoom, const int& startIdx, const int& roomLength){
+    backTrackingCastleQueue(castle,countessPnt,roomLength);
+    printf("Start in room %d, row %d, column %d\n", startRoom, (startIdx / roomLength), (startIdx % roomLength));
+    for (int rIdx = 0; rIdx < roomNum; ++rIdx) {
+        printf("//castle room %d\n",rIdx);
+        for (int pIdx = 0; pIdx < roomLength * roomLength; ++pIdx) {
+            Point *curPoint = &( (*castle)[rIdx][pIdx] );
+            if (curPoint->pnt_type == 'C'){
+                printf("C");
+            }
+                // point on the route !!!
+            else if ( curPoint->pnt_type == 'V' || curPoint->pnt_type == 'S'){
+                // from Pipe or it itself is a warp pipe will engage a "p" CHECK!!!
+                if ( curPoint->direction - '0' >= 0 && '9' - curPoint->direction >= 0 ){
+                    printf("p");
+                }
+                else{
+                    printf("%c", curPoint->direction);
+                }
+            }
+                // point not on the route !!
+            else{
+                printf("%c",curPoint->pnt_type);
+            }
+            if (pIdx % roomLength == roomLength - 1)
+                printf("\n");
+        }
+    }
+}
+
+void printListQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength){
+    stack<string*> listOutput;
+    Point *curPnt = countessPnt;
+    Point *prevPnt  = nullptr;
+    printf("Path taken:\n");
+    while (curPnt->pnt_type != 'S'){
+        if ( curPnt->direction - '0' >= 0 && '9' - curPnt->direction >= 0){
+            int a = (int) (curPnt->direction - '0');
+            prevPnt = &(*castle)[a][curPnt->idx];
+        }
+        else if (curPnt->direction == 'n'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx + roomLength];
+        }
+        else if (curPnt->direction == 'e'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx - 1];
+        }
+        else if (curPnt->direction == 's'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx - roomLength];
+        }
+        else if (curPnt->direction == 'w'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx + 1];
+        }
+        else{
+            std::cerr << "failure in back-tracking queue! error in printListQueue!\n";
+            exit(1);
+        }
+        auto *info = new string;
+        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction);
+        // debug
+        // printf("%s\n",info->c_str());
+        listOutput.push(info);
+        curPnt = prevPnt; /// update to continue back-tracking
+    }
+    while(!listOutput.empty()){
+        string *e = listOutput.top();
+        printf("%s\n",e->c_str());
+        delete e;
+        listOutput.pop();
+    }
+}
+// END QUEUE

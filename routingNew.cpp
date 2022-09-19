@@ -6,8 +6,18 @@
 // NOTE: direction contains : 'S', 'n', 'e', 's', 'w', number in char, such as '0', '1', etc AND '\0' !!!
 // NOTE: '\0' means this point has NOT BEEN VISITED !
 // NOTE: when printing as MAP, the point with pnt_type as @'V' means on the route !!!
+// The @'P' means it is a PIPE !!!
+
 
 // UTILITIES
+
+string pointInfoGen(Point *pnt, const int &roomLength, char curDrc) {
+    return "(" + std::to_string(pnt->roomIdx)
+           + "," + std::to_string((pnt->idx / roomLength) )
+           + "," + std::to_string( (pnt->idx % roomLength) )
+           + "," + curDrc + ")";
+}
+
 Point* takeOneDirection(vector<vector<Point>> *castle, const int &curRoomInx, const unsigned int &curPointInx, const char &direction, const int& roomSize){
 
     if (direction == 'n') {
@@ -76,7 +86,7 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
         visitedStack->pop();         // WILL the INFO of this point be DELETED after popping ???
         // first, check if Pipe
         Point *nextPosIfPipe = nullptr;
-        if (curPos->pnt_type - '0' >= 0 && '9' - curPos->pnt_type >= 0 ){
+        if ( (curPos->pnt_type - '0' >= 0) && ('9' - curPos->pnt_type >= 0) ){
             int pipeTo = atoi(&(curPos->pnt_type));
             if ( pipeTo < roomNum) {
                 nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
@@ -89,7 +99,6 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                 }
             }
         }
-            // second, just four directions
         else{
             int curRoomNum = atoi(&(curPos->roomIdx));
             unsigned int curPntIdx = curPos->idx;
@@ -141,19 +150,24 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
     char nextToNext;
     while(true){
         if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
-            nextPnt = &( (*castle)[atoi(&(curPnt->direction))][curPnt->idx] );
+            int a = nextDirection  - '0';
+            nextPnt = &( (*castle)[a][curPnt->idx] );
         }
         else if(nextDirection == 'n'){
-            nextPnt = & ( (*castle)[ atoi(& (curPnt->roomIdx)) ][curPnt->idx + roomLength] );
+            int a = curPnt->roomIdx - '0';
+            nextPnt = & ( (*castle)[ a ][curPnt->idx + roomLength] );
         }
         else if (nextDirection == 'e'){
-            nextPnt = &( (*castle)[ atoi(& (curPnt->roomIdx)) ][curPnt->idx - 1] );
+            int a = (int) (curPnt->roomIdx - '0');
+            nextPnt = &( (*castle)[ a ][curPnt->idx - 1] );
         }
         else if (nextDirection == 's'){
-            nextPnt = &( (*castle)[ atoi(& (curPnt->roomIdx)) ][curPnt->idx - roomLength] );
+            int a = (int) (curPnt->roomIdx - '0');
+            nextPnt = &( (*castle)[ a ][curPnt->idx - roomLength] );
         }
         else if (nextDirection == 'w'){
-            nextPnt = &( (*castle)[ atoi(& (curPnt->roomIdx)) ][curPnt->idx + 1] );
+            int a = (int) (curPnt->roomIdx - '0');
+            nextPnt = &( (*castle)[ a ][curPnt->idx + 1] );
         }
         else{
             std::cerr << "failure in Stack back-tracking! Point from no where !\n";
@@ -163,7 +177,12 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
             nextPnt->direction = nextDirection;
             break;
         }
-        nextPnt->pnt_type = 'V';
+
+        if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
+            nextPnt->pnt_type = 'P';
+        }else
+            nextPnt->pnt_type = 'V';
+
         nextToNext = nextPnt->direction;  // the direction after nextPnt should take
         nextPnt->direction = nextDirection; // this is the direction this prev point should take (reason this)
         nextDirection = nextToNext;
@@ -201,5 +220,49 @@ void printMapStack(Point* countessPnt, vector<vector<Point>> *castle, const int&
     }
 }
 
+void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength){
+    stack<string*> listOutput;
+    Point *curPnt = countessPnt;
+    Point *prevPnt  = nullptr;
+    printf("Path taken:\n");
+    while (curPnt->pnt_type != 'S'){
+        if ( curPnt->direction - '0' >= 0 && '9' - curPnt->direction >= 0){
+            int a = (int) (curPnt->direction - '0');
+            prevPnt = &(*castle)[a][curPnt->idx];
+        }
+        else if (curPnt->direction == 'n'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx + roomLength];
+        }
+        else if (curPnt->direction == 'e'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx - 1];
+        }
+        else if (curPnt->direction == 's'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx - roomLength];
+        }
+        else if (curPnt->direction == 'w'){
+            int a = (int) (curPnt->roomIdx - '0');
+            prevPnt = &(*castle)[a][curPnt->idx + 1];
+        }
+        else{
+            std::cerr << "failure in back-tracking queue! error in printListQueue!\n";
+            exit(1);
+        }
+        auto *info = new string;
+        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction);
+        printf("%s\n",info->c_str());
+        listOutput.push(info);
+        curPnt = prevPnt; /// update to continue back-tracking
+    }
+//    while(!listOutput.empty()){
+//        string *e = listOutput.top();
+//        printf("%s\n",e->c_str());
+//        delete e;
+//        listOutput.pop();
+//    }
+
+}
 
 // END STACK

@@ -12,6 +12,7 @@ using std::queue;
 
 
 // UTILITIES
+string pointInfoGen(Point *pnt, const int &roomLength, char curDrc);
 Point* takeOneDirection(vector<vector<Point>> *castle, const int &curRoomInx, const unsigned int &curPointInx, const char &direction, const int& roomSize);
 // UTILITIES
 
@@ -23,6 +24,7 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
 void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength);
 void printMapStack(Point* countessPnt, vector<vector<Point>> *castle,
                    const int& roomNum, const int& startRoom, const int& startIdx, const int& roomLength);
+void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength);
 // END STACK
 
 #endif //SUPERMACRO_ROUTINGNEW_H

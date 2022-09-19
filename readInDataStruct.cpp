@@ -37,6 +37,7 @@ void readInputMap(vector<vector<Point>> *castle,const int& roomLength,int *start
             Point *curPnt = &((*castle)[rCnt][( perRoomCnt % roomLength ) * roomLength + i]);
             curPnt->pnt_type = t;
             curPnt->idx = ( perRoomCnt % roomLength ) * roomLength + i;
+            curPnt->roomIdx = std::to_string(rCnt)[0];
         }
         perRoomCnt ++;
         if (perRoomCnt == roomLength){
@@ -93,7 +94,6 @@ void readInputList(vector<vector<Point>> *castle,const int& roomNum,const int& r
             }
             Point *curPnt = &((*castle)[rN][row * roomLength + col]);
             curPnt->pnt_type = t;
-            curPnt->idx = row * roomLength + col;
         }
     }
 }
@@ -104,9 +104,15 @@ void printMap(vector<vector<Point>> *castle, const int &roomNum, const int &room
         for (int j = 0; j < roomLength * roomLength; ++j) {
             Point pnt = (*castle)[i][j];
             if (j % roomLength == roomLength - 1 && j != roomLength * roomLength - 1) {
-                printf("%c\n",pnt.pnt_type);
+                if (pnt.direction == '\0')
+                    printf("%c\n",pnt.pnt_type);
+                else
+                    printf("%c\n",pnt.direction);
             } else {
-                printf("%c",pnt.pnt_type);
+                if (pnt.direction == '\0')
+                    printf("%c",pnt.pnt_type);
+                else
+                    printf("%c",pnt.direction);
             }
         }
         printf("\n");

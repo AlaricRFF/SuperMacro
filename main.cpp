@@ -109,12 +109,12 @@ int main(int argc, char *argv[]) {
         // map reading
         if (mode == "M") {
             readInputMap(&castle, roomLength, &startRoom, &startIdx);
-            printMap(&castle,roomNum,roomLength);
+            //printMap(&castle,roomNum,roomLength);
         }
             // list reading
         else if (mode == "L"){
             readInputList(&castle, roomNum, roomLength, &startRoom, &startIdx);
-            printMap(&castle,roomNum,roomLength);
+            //printMap(&castle,roomNum,roomLength);
         }
     }
         /// error checking
@@ -148,7 +148,12 @@ int main(int argc, char *argv[]) {
             printf("No solution, %d tiles discovered.\n", totalTiles);
             return 0;
         }
-        printMapStack(findCountess,&castle,roomNum,startRoom,startIdx,roomLength);
+        if (!listOutputMode) {
+            printMap(&castle, roomNum, roomLength);
+            printMapStack(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
+        } else{
+            printListStack(findCountess,&castle,roomLength);
+        }
     }
 //        else{ // list mode
 //            printListStack(&backRoute,roomLength);

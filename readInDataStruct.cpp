@@ -65,7 +65,6 @@ void readInputList(vector<vector<Point>> *castle,const int& roomNum,const int& r
         }
         int rN, row, col;
         char t; // type
-        bool flag = false; // if . or # or ! or C or S is met, turn to true
         sscanf(line.c_str(),"(%d,%d,%d,%c)",&rN,&row,&col,&t);
 
         // error checking

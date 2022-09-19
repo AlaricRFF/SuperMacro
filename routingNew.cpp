@@ -27,25 +27,25 @@ string pointInfoGen(Point *pnt, const int &roomLength, char curDrc) {
 Point* takeOneDirection(vector<vector<Point>> *castle, const int &curRoomInx, const unsigned int &curPointInx, const char &direction, const int& roomSize){
 
     if (direction == 'n') {
-        if (curPointInx > roomSize - 1) { // the point is not on the first row of the room
+        if ((int)curPointInx > roomSize - 1) { // the point is not on the first row of the room
             Point *nextPos = &((*castle)[curRoomInx][curPointInx - roomSize]);
             return (nextPos->direction == '\0' ? nextPos : nullptr); // check whether the point has been visited
         } else
             return nullptr;
     } else if (direction == 'w') {
-        if (curPointInx % roomSize != 0) { // the point is not on the first column of the room
+        if ((int)curPointInx % roomSize != 0) { // the point is not on the first column of the room
             Point *nextPos = &( (*castle)[curRoomInx][curPointInx - 1] );
             return (nextPos->direction == '\0' ? nextPos : nullptr);
         } else
             return nullptr;
     } else if (direction == 's') {
-        if (curPointInx < roomSize * (roomSize - 1)) { // the point is not on the last row of the room
+        if ((int)curPointInx < roomSize * (roomSize - 1)) { // the point is not on the last row of the room
             Point *nextPos = &( (*castle)[curRoomInx][curPointInx + roomSize] );
             return (nextPos->direction == '\0' ? nextPos : nullptr);
         } else
             return nullptr;
     } else { // direction is 'e'
-        if (curPointInx % roomSize != roomSize - 1) {
+        if ((int)curPointInx % roomSize != roomSize - 1) {
             Point *nextPos = &( (*castle)[curRoomInx][curPointInx + 1] );
             return (nextPos->direction == '\0' ? nextPos : nullptr);
         } else

@@ -16,7 +16,7 @@ struct Point{
     char pnt_type = '\0';
     char direction = '\0';
     char roomIdx = '\0';
-    unsigned int idx = -1;
+    unsigned int idx = 0;
 };
 
 void readInputMap(vector<vector<Point>> *castle,const int& roomLength,int *startRoom,int *startIdx);

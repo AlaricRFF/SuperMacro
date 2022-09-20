@@ -113,6 +113,7 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                 if (PushDecisionStack(nextPosIfPipe, &findCountess,totalTiles,visitedStack) == 1) {
                     if (findCountess == 1) { /// find countess, return that point
                         // IMPORTANT: already updated in PushDecisionStack !
+                        nextPosIfPipe->direction = std::to_string(curRoomNum)[0];
                         CountessPosition->idx = curPntIdx;
                         CountessPosition->roomIdx = pipeTo;
                         // free dynamic memory
@@ -389,6 +390,7 @@ findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, con
                 if (PushDecisionQueue(nextPosIfPipe, &findCountess,totalTiles,visitedQueue) == 1) {
                     if (findCountess == 1) { /// find countess, return that point
                         // IMPORTANT: already updated in PushDecisionStack !
+                        nextPosIfPipe->direction = std::to_string(curRoomNum)[0];
                         countessLct->idx = curPntIdx;
                         countessLct->roomIdx = pipeTo;
                         // free dynamic memory

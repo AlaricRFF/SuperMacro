@@ -1,3 +1,4 @@
+// Project Identifier: B99292359FFD910ED13A7E6C7F9705B8742F0D79
 #include <iostream>
 #include <getopt.h>
 #include <cstdlib>
@@ -143,14 +144,17 @@ int main(int argc, char *argv[]) {
     if (isStackNotQueue) {
         int totalTiles = 1;
         stack<Point *> visitedStack;
-        Point *findCountess = findRoute_stack(&visitedStack, &castle, startRoom, startIdx, roomLength, roomNum, &totalTiles);
+        pos CountessPosition(0,0);
+        Point *findCountess = findRoute_stack(&visitedStack, &castle, startRoom, startIdx, roomLength, roomNum,
+                                              &totalTiles, &CountessPosition);
         if (findCountess == nullptr) {
+            //printMap(&castle, roomNum, roomLength);
             printf("No solution, %d tiles discovered.\n", totalTiles);
             return 0;
         }
         if (!listOutputMode) {
-            //printMap(&castle, roomNum, roomLength);
-            printMapStack(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
+            printMap(&castle, roomNum, roomLength);
+            //printMapStack(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
         } else{
             printListStack(findCountess,&castle,roomLength);
         }

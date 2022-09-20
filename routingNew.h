@@ -1,6 +1,4 @@
-//
-// Created by Yuxiang Chen on 9/18/22.
-//
+// Project Identifier: B99292359FFD910ED13A7E6C7F9705B8742F0D79
 
 #ifndef SUPERMACRO_ROUTINGNEW_H
 #define SUPERMACRO_ROUTINGNEW_H
@@ -20,7 +18,7 @@ Point* takeOneDirection(vector<vector<Point>> *castle, const int &curRoomInx, co
 int PushDecisionStack(Point *nextPossiblePos, int *foundCountess, int *tilesDiscovered, stack<Point *> *visitedStack);
 Point *
 findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
-                const int &roomLength, const int &roomNum, int *totalTiles);
+                const int &roomLength, const int &roomNum, int *totalTiles, pos *CountessPosition);
 void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength);
 void printMapStack(Point* countessPnt, vector<vector<Point>> *castle,
                    const int& roomNum, const int& startRoom, const int& startIdx, const int& roomLength);

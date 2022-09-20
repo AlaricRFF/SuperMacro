@@ -1,6 +1,4 @@
-//
-// Created by Yuxiang Chen on 9/18/22.
-//
+// Project Identifier: B99292359FFD910ED13A7E6C7F9705B8742F0D79
 
 #ifndef SUPERMACRO_READINDATASTRUCT_H
 #define SUPERMACRO_READINDATASTRUCT_H
@@ -17,6 +15,14 @@ struct Point{
     char direction = '\0';
     char roomIdx = '\0';
     unsigned int idx = 0;
+};
+struct pos{
+    uint32_t idx = 0;
+    uint32_t roomIdx = 0;
+    pos(uint32_t idx, uint32_t roomIdx){
+        this->idx = idx;
+        this->roomIdx = roomIdx;
+    }
 };
 
 void readInputMap(vector<vector<Point>> *castle,const int& roomLength,int *startRoom,int *startIdx);

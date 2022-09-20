@@ -1,6 +1,4 @@
-//
-// Created by Yuxiang Chen on 9/18/22.
-//
+// Project Identifier: B99292359FFD910ED13A7E6C7F9705B8742F0D79
 
 #include "routingNew.h"
 // NOTE: direction contains : 'S', 'n', 'e', 's', 'w', number in char, such as '0', '1', etc AND '\0' !!!
@@ -78,37 +76,61 @@ int PushDecisionStack(Point *nextPossiblePos, int *foundCountess, int *tilesDisc
         return 0;
 }
 
+// pos return the position of the countess
 Point *
 findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
-                const int &roomLength, const int &roomNum, int *totalTiles) {
+                const int &roomLength, const int &roomNum, int *totalTiles, pos *CountessPosition) {
+    stack<pos*> positionStack;
     int  findCountess = 0;
     // push start to visitedStack
     Point *start = &((*castle)[startRoom][startIdx]);
+    // dynamic memory allocated !
+    pos *startPos = new pos(startIdx, startRoom);
+    positionStack.push(startPos);
     visitedStack->push( start );
     Point *curPos = start;
     start->direction = 'S';
     // Start search through the castle
     while (true){
+        // current location
+        pos *position = positionStack.top();
+        uint32_t curRoomNum = position->roomIdx;
+        uint32_t  curPntIdx = position->idx;
         curPos = visitedStack->top();
-        visitedStack->pop();         // WILL the INFO of this point be DELETED after popping ???
+        visitedStack->pop(); // WILL the INFO of this point be DELETED after popping ???
+        positionStack.pop();
+        // free dynamic memory !!
+        delete position;
+
         // first, check if Pipe
         Point *nextPosIfPipe = nullptr;
         if ( (curPos->pnt_type - '0' >= 0) && ('9' - curPos->pnt_type >= 0) ){
             int pipeTo = (int) curPos->pnt_type - '0';
             if ( pipeTo < roomNum) {
-                nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
+                nextPosIfPipe = &(*castle)[pipeTo][curPntIdx];
+                //nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
                 if (PushDecisionStack(nextPosIfPipe, &findCountess,totalTiles,visitedStack) == 1) {
+                    if (findCountess == 1) { /// find countess, return that point
+                        // IMPORTANT: already updated in PushDecisionStack !
+                        CountessPosition->idx = curPntIdx;
+                        CountessPosition->roomIdx = pipeTo;
+                        // free dynamic memory
+                        while (!positionStack.empty()){
+                            auto p = positionStack.top();
+                            positionStack.pop();
+                            delete p;
+                        }
+                        return nextPosIfPipe;
+                    }
                     nextPosIfPipe->direction = curPos->roomIdx;
-                }
-                if (findCountess == 1) { /// find countess, return that point
-                    // IMPORTANT: already updated in PushDecisionStack !
-                    return nextPosIfPipe;
+                    pos *newPosition = new pos(curPntIdx, pipeTo);
+                    positionStack.push(newPosition);
                 }
             }
         }
         else{
-            int curRoomNum = (int) curPos->roomIdx - '0';
-            unsigned int curPntIdx = curPos->idx;
+            // int curRoomNum = (int) curPos->roomIdx - '0';
+            // unsigned int curPntIdx = curPos->idx;
             Point *NorthP = takeOneDirection(castle,curRoomNum,curPntIdx,'n',roomLength);
             Point *EastP = takeOneDirection(castle,curRoomNum,curPntIdx,'e',roomLength);
             Point *SouthP = takeOneDirection(castle,curRoomNum,curPntIdx,'s',roomLength);
@@ -118,26 +140,54 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
             // North accessible
             if (PushDecisionStack(NorthP, &findCountess, totalTiles, visitedStack) == 1){
                 NorthP->direction = 'n';
+                pos *northP = new pos(curPntIdx - roomLength,curRoomNum);
+                positionStack.push(northP);
                 if (findCountess == 1){
+                    while (!positionStack.empty()){
+                        auto p = positionStack.top();
+                        positionStack.pop();
+                        delete p;
+                    }
                     return NorthP;
                 }
 
             }
             if (PushDecisionStack(EastP, &findCountess, totalTiles, visitedStack) == 1){
                 EastP->direction = 'e';
+                pos *eastP = new pos(curPntIdx + 1, curRoomNum);
+                positionStack.push(eastP);
                 if (findCountess == 1){
+                    while (!positionStack.empty()){
+                        auto p = positionStack.top();
+                        positionStack.pop();
+                        delete p;
+                    }
                     return EastP;
                 }
             }
             if (PushDecisionStack(SouthP, &findCountess, totalTiles, visitedStack) == 1){
                 SouthP->direction = 's';
+                pos *southP = new pos(curPntIdx + roomLength, curRoomNum);
+                positionStack.push(southP);
                 if (findCountess == 1){
+                    while (!positionStack.empty()){
+                        auto p = positionStack.top();
+                        positionStack.pop();
+                        delete p;
+                    }
                     return SouthP;
                 }
             }
             if (PushDecisionStack(WestP, &findCountess, totalTiles, visitedStack) == 1){
                 WestP->direction = 'w';
+                pos *westP = new pos(curPntIdx - 1, curRoomNum);
+                positionStack.push(westP);
                 if (findCountess == 1){
+                    while (!positionStack.empty()){
+                        auto p = positionStack.top();
+                        positionStack.pop();
+                        delete p;
+                    }
                     return WestP;
                 }
             }

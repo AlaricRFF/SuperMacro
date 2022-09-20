@@ -9,16 +9,17 @@
 
 // UTILITIES
 
-string pointInfoGen(Point *pnt, const int &roomLength, char curDrc) {
+string pointInfoGen(Point *pnt, const int &roomLength, char curDrc,
+                    const uint32_t& curIdx, const uint32_t curRoomIdx) {
     if (curDrc - '0' >= 0 && '9' - curDrc >= 0){
-        return "(" + std::to_string((int) (pnt->roomIdx - '0'))
-               + "," + std::to_string((pnt->idx / roomLength) )
-               + "," + std::to_string( (pnt->idx % roomLength) )
+        return "(" + std::to_string(curRoomIdx)
+               + "," + std::to_string((curIdx / roomLength) )
+               + "," + std::to_string( (curIdx % roomLength) )
                + ",p)";
     }else
-    return "(" + std::to_string((int) (pnt->roomIdx - '0'))
-           + "," + std::to_string((pnt->idx / roomLength) )
-           + "," + std::to_string( (pnt->idx % roomLength) )
+    return "(" + std::to_string(curRoomIdx)
+           + "," + std::to_string((curIdx / roomLength) )
+           + "," + std::to_string( (curIdx % roomLength) )
            + "," + curDrc + ")";
 }
 
@@ -122,7 +123,7 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                         }
                         return nextPosIfPipe;
                     }
-                    nextPosIfPipe->direction = curPos->roomIdx;
+                    nextPosIfPipe->direction = std::to_string(curRoomNum)[0];
                     pos *newPosition = new pos(curPntIdx, pipeTo);
                     positionStack.push(newPosition);
                 }
@@ -143,6 +144,8 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                 pos *northP = new pos(curPntIdx - roomLength,curRoomNum);
                 positionStack.push(northP);
                 if (findCountess == 1){
+                    CountessPosition->idx = curPntIdx - roomLength;
+                    CountessPosition->roomIdx = curRoomNum;
                     while (!positionStack.empty()){
                         auto p = positionStack.top();
                         positionStack.pop();
@@ -157,6 +160,8 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                 pos *eastP = new pos(curPntIdx + 1, curRoomNum);
                 positionStack.push(eastP);
                 if (findCountess == 1){
+                    CountessPosition->roomIdx = curRoomNum;
+                    CountessPosition->idx = curPntIdx + 1;
                     while (!positionStack.empty()){
                         auto p = positionStack.top();
                         positionStack.pop();
@@ -170,6 +175,8 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                 pos *southP = new pos(curPntIdx + roomLength, curRoomNum);
                 positionStack.push(southP);
                 if (findCountess == 1){
+                    CountessPosition->roomIdx = curRoomNum;
+                    CountessPosition->idx = curPntIdx + roomLength;
                     while (!positionStack.empty()){
                         auto p = positionStack.top();
                         positionStack.pop();
@@ -183,6 +190,8 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
                 pos *westP = new pos(curPntIdx - 1, curRoomNum);
                 positionStack.push(westP);
                 if (findCountess == 1){
+                    CountessPosition->roomIdx = curRoomNum;
+                    CountessPosition->idx = curPntIdx - 1;
                     while (!positionStack.empty()){
                         auto p = positionStack.top();
                         positionStack.pop();
@@ -199,32 +208,34 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
 }
 
 
-void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength){
+void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength, const pos& countessPosition){
     Point *curPnt = countessLct;
     Point *nextPnt = nullptr;
-
+    uint32_t curIdx = countessPosition.idx;
+    uint32_t curRoomIdx = countessPosition.roomIdx;
     char nextDirection = countessLct->direction;
     char nextToNext;
     while(true){
         if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
             int a = nextDirection  - '0';
-            nextPnt = &( (*castle)[a][curPnt->idx] );
+            nextPnt = &( (*castle)[a][curIdx] );
+            curRoomIdx = a;
         }
         else if(nextDirection == 'n'){
-            int a = curPnt->roomIdx - '0';
-            nextPnt = & ( (*castle)[ a ][curPnt->idx + roomLength] );
+            curIdx += roomLength;
+            nextPnt = & ( (*castle)[ curRoomIdx ][curIdx] );
         }
         else if (nextDirection == 'e'){
-            int a = (int) (curPnt->roomIdx - '0');
-            nextPnt = &( (*castle)[ a ][curPnt->idx - 1] );
+            curIdx -= 1;
+            nextPnt = &( (*castle)[ curRoomIdx ][curIdx] );
         }
         else if (nextDirection == 's'){
-            int a = (int) (curPnt->roomIdx - '0');
-            nextPnt = &( (*castle)[ a ][curPnt->idx - roomLength] );
+            curIdx -= roomLength;
+            nextPnt = &( (*castle)[ curRoomIdx ][curIdx] );
         }
         else if (nextDirection == 'w'){
-            int a = (int) (curPnt->roomIdx - '0');
-            nextPnt = &( (*castle)[ a ][curPnt->idx + 1] );
+            curIdx += 1;
+            nextPnt = &( (*castle)[ curRoomIdx ][curIdx] );
         }
         else{
             std::cerr << "failure in Stack back-tracking! Point from no where !\n";
@@ -243,8 +254,9 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
     }
 }
 
-void printMapStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum, const int& startRoom, const int& startIdx, const int& roomLength){
-    backTrackingCastleStack(castle,countessPnt,roomLength);
+void printMapStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum, const int& startRoom,
+                   const int& startIdx, const int& roomLength, const pos& countessPosition){
+    backTrackingCastleStack(castle,countessPnt,roomLength,countessPosition);
     printf("Start in room %d, row %d, column %d\n", startRoom, (startIdx / roomLength), (startIdx % roomLength));
     for (int rIdx = 0; rIdx < roomNum; ++rIdx) {
         printf("//castle room %d\n",rIdx);
@@ -273,38 +285,41 @@ void printMapStack(Point* countessPnt, vector<vector<Point>> *castle, const int&
     }
 }
 
-void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength){
+void printListStack(Point *countessPnt, vector<vector<Point>> *castle, const int &roomLength, const pos &countessLct) {
     stack<string*> listOutput;
     Point *curPnt = countessPnt;
     Point *prevPnt  = nullptr;
+    uint32_t curIdx = countessLct.idx;
+    uint32_t curRoomIdx = countessLct.roomIdx;
     printf("Path taken:\n");
     while (curPnt->pnt_type != 'S'){
         if ( curPnt->direction - '0' >= 0 && '9' - curPnt->direction >= 0){
-            int a = (int) (curPnt->direction - '0');
-            prevPnt = &(*castle)[a][curPnt->idx];
+            curRoomIdx= (int) (curPnt->direction - '0');
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
+
         }
         else if (curPnt->direction == 'n'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx + roomLength];
+            curIdx += roomLength;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else if (curPnt->direction == 'e'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx - 1];
+            curIdx -= 1;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else if (curPnt->direction == 's'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx - roomLength];
+            curIdx -= roomLength;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else if (curPnt->direction == 'w'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx + 1];
+            curIdx += 1;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else{
             std::cerr << "failure in back-tracking queue! error in printListQueue!\n";
             exit(1);
         }
         auto *info = new string;
-        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction);
+        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction,curIdx,curRoomIdx);
         // debug
         // printf("%s\n",info->c_str());
         listOutput.push(info);
@@ -343,64 +358,123 @@ int PushDecisionQueue(Point *nextPossiblePos, int *foundCountess, int *tilesDisc
 
 Point *
 findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
-                const int &roomLength, const int &roomNum, int *totalTiles) {
+                const int &roomLength, const int &roomNum, int *totalTiles, pos *countessLct) {
+    queue<pos*> positionQueue;
     int  findCountess = 0;
     // push start to visitedStack
     Point *start = &((*castle)[startRoom][startIdx]);
-    visitedQueue->push( start  );
+    // dynamic memory allocated !
+    pos *startPos = new pos(startIdx, startRoom);
+    positionQueue.push(startPos);
+    visitedQueue->push( start );
     Point *curPos = start;
     start->direction = 'S';
     // Start search through the castle
     while (true){
+        // current location
+        pos *position = positionQueue.front();
+        uint32_t curRoomNum = position->roomIdx;
+        uint32_t  curPntIdx = position->idx;
         curPos = visitedQueue->front();
-        visitedQueue->pop();         // WILL the INFO of this point be DELETED after popping ???
+        visitedQueue->pop(); // WILL the INFO of this point be DELETED after popping ???
+        positionQueue.pop();
+        // free dynamic memory !!
+        delete position;
+
         // first, check if Pipe
         Point *nextPosIfPipe = nullptr;
         if ( (curPos->pnt_type - '0' >= 0) && ('9' - curPos->pnt_type >= 0) ){
             int pipeTo = (int) curPos->pnt_type - '0';
             if ( pipeTo < roomNum) {
-                nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
+                nextPosIfPipe = &(*castle)[pipeTo][curPntIdx];
+                //nextPosIfPipe = &((*castle)[pipeTo][curPos->idx]);
                 if (PushDecisionQueue(nextPosIfPipe, &findCountess,totalTiles,visitedQueue) == 1) {
-                    nextPosIfPipe->direction = curPos->roomIdx;
-                }
-                if (findCountess == 1) { /// find countess, return that point
-                    // IMPORTANT: already updated in PushDecisionQueue !
-                    return nextPosIfPipe;
+                    if (findCountess == 1) { /// find countess, return that point
+                        // IMPORTANT: already updated in PushDecisionStack !
+                        countessLct->idx = curPntIdx;
+                        countessLct->roomIdx = pipeTo;
+                        // free dynamic memory
+                        while (!positionQueue.empty()){
+                            auto p = positionQueue.front();
+                            positionQueue.pop();
+                            delete p;
+                        }
+                        return nextPosIfPipe;
+                    }
+                    nextPosIfPipe->direction = std::to_string(curRoomNum)[0];
+                    pos *newPosition = new pos(curPntIdx, pipeTo);
+                    positionQueue.push(newPosition);
                 }
             }
         }
         else{
-            int curRoomNum = (int) curPos->roomIdx - '0';
-            unsigned int curPntIdx = curPos->idx;
-            Point *NorthP = takeOneDirection(castle,curRoomNum,curPntIdx,'n',roomLength);
-            Point *EastP = takeOneDirection(castle,curRoomNum,curPntIdx,'e',roomLength);
-            Point *SouthP = takeOneDirection(castle,curRoomNum,curPntIdx,'s',roomLength);
-            Point *WestP = takeOneDirection(castle,curRoomNum,curPntIdx,'w',roomLength);
+            // int curRoomNum = (int) curPos->roomIdx - '0';
+            // unsigned int curPntIdx = curPos->idx;
+            Point *NorthP = takeOneDirection(castle,(int)curRoomNum,curPntIdx,'n',roomLength);
+            Point *EastP = takeOneDirection(castle,(int)curRoomNum,curPntIdx,'e',roomLength);
+            Point *SouthP = takeOneDirection(castle,(int)curRoomNum,curPntIdx,'s',roomLength);
+            Point *WestP = takeOneDirection(castle,(int)curRoomNum,curPntIdx,'w',roomLength);
 
 
             // North accessible
             if (PushDecisionQueue(NorthP, &findCountess, totalTiles, visitedQueue) == 1){
                 NorthP->direction = 'n';
+                pos *northP = new pos(curPntIdx - roomLength,curRoomNum);
+                positionQueue.push(northP);
                 if (findCountess == 1){
+                    countessLct->idx = curPntIdx - roomLength;
+                    countessLct->roomIdx = curRoomNum;
+                    while (!positionQueue.empty()){
+                        auto p = positionQueue.front();
+                        positionQueue.pop();
+                        delete p;
+                    }
                     return NorthP;
                 }
 
             }
             if (PushDecisionQueue(EastP, &findCountess, totalTiles, visitedQueue) == 1){
                 EastP->direction = 'e';
+                pos *eastP = new pos(curPntIdx + 1, curRoomNum);
+                positionQueue.push(eastP);
                 if (findCountess == 1){
+                    countessLct->roomIdx = curRoomNum;
+                    countessLct->idx = curPntIdx + 1;
+                    while (!positionQueue.empty()){
+                        auto p = positionQueue.front();
+                        positionQueue.pop();
+                        delete p;
+                    }
                     return EastP;
                 }
             }
             if (PushDecisionQueue(SouthP, &findCountess, totalTiles, visitedQueue) == 1){
                 SouthP->direction = 's';
+                pos *southP = new pos(curPntIdx + roomLength, curRoomNum);
+                positionQueue.push(southP);
                 if (findCountess == 1){
+                    countessLct->roomIdx = curRoomNum;
+                    countessLct->idx = curPntIdx + roomLength;
+                    while (!positionQueue.empty()){
+                        auto p = positionQueue.front();
+                        positionQueue.pop();
+                        delete p;
+                    }
                     return SouthP;
                 }
             }
             if (PushDecisionQueue(WestP, &findCountess, totalTiles, visitedQueue) == 1){
                 WestP->direction = 'w';
+                pos *westP = new pos(curPntIdx - 1, curRoomNum);
+                positionQueue.push(westP);
                 if (findCountess == 1){
+                    countessLct->roomIdx = curRoomNum;
+                    countessLct->idx = curPntIdx - 1;
+                    while (!positionQueue.empty()){
+                        auto p = positionQueue.front();
+                        positionQueue.pop();
+                        delete p;
+                    }
                     return WestP;
                 }
             }
@@ -411,35 +485,38 @@ findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, con
     }
 }
 
-void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength){
+void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct,
+                             const int& roomLength, const pos& countessPosition){
     Point *curPnt = countessLct;
     Point *nextPnt = nullptr;
-
+    uint32_t curIdx = countessPosition.idx;
+    uint32_t curRoomIdx = countessPosition.roomIdx;
     char nextDirection = countessLct->direction;
     char nextToNext;
     while(true){
         if (nextDirection - '0' >= 0 && '9' - nextDirection >= 0){
             int a = nextDirection  - '0';
-            nextPnt = &( (*castle)[a][curPnt->idx] );
+            nextPnt = &( (*castle)[a][curIdx] );
+            curRoomIdx = a;
         }
         else if(nextDirection == 'n'){
-            int a = curPnt->roomIdx - '0';
-            nextPnt = & ( (*castle)[ a ][curPnt->idx + roomLength] );
+            curIdx += roomLength;
+            nextPnt = & ( (*castle)[ curRoomIdx ][curIdx] );
         }
         else if (nextDirection == 'e'){
-            int a = (int) (curPnt->roomIdx - '0');
-            nextPnt = &( (*castle)[ a ][curPnt->idx - 1] );
+            curIdx -= 1;
+            nextPnt = &( (*castle)[ curRoomIdx ][curIdx] );
         }
         else if (nextDirection == 's'){
-            int a = (int) (curPnt->roomIdx - '0');
-            nextPnt = &( (*castle)[ a ][curPnt->idx - roomLength] );
+            curIdx -= roomLength;
+            nextPnt = &( (*castle)[ curRoomIdx ][curIdx] );
         }
         else if (nextDirection == 'w'){
-            int a = (int) (curPnt->roomIdx - '0');
-            nextPnt = &( (*castle)[ a ][curPnt->idx + 1] );
+            curIdx += 1;
+            nextPnt = &( (*castle)[ curRoomIdx ][curIdx] );
         }
         else{
-            std::cerr << "failure in Queue back-tracking! Point from no where !\n";
+            std::cerr << "failure in Stack back-tracking! Point from no where !\n";
             exit(1);
         }
         if (nextPnt->pnt_type == 'S'){
@@ -455,8 +532,9 @@ void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct, 
     }
 }
 
-void printMapQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum, const int& startRoom, const int& startIdx, const int& roomLength){
-    backTrackingCastleQueue(castle,countessPnt,roomLength);
+void printMapQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum,
+                   const int& startRoom, const int& startIdx, const int& roomLength,const pos& countessPosition){
+    backTrackingCastleQueue(castle,countessPnt,roomLength,countessPosition);
     printf("Start in room %d, row %d, column %d\n", startRoom, (startIdx / roomLength), (startIdx % roomLength));
     for (int rIdx = 0; rIdx < roomNum; ++rIdx) {
         printf("//castle room %d\n",rIdx);
@@ -485,38 +563,42 @@ void printMapQueue(Point* countessPnt, vector<vector<Point>> *castle, const int&
     }
 }
 
-void printListQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength){
+void printListQueue(Point* countessPnt, vector<vector<Point>> *castle,
+                    const int& roomLength, const pos& countessLct){
     stack<string*> listOutput;
     Point *curPnt = countessPnt;
     Point *prevPnt  = nullptr;
+    uint32_t curIdx = countessLct.idx;
+    uint32_t curRoomIdx = countessLct.roomIdx;
     printf("Path taken:\n");
     while (curPnt->pnt_type != 'S'){
         if ( curPnt->direction - '0' >= 0 && '9' - curPnt->direction >= 0){
-            int a = (int) (curPnt->direction - '0');
-            prevPnt = &(*castle)[a][curPnt->idx];
+            curRoomIdx= (int) (curPnt->direction - '0');
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
+
         }
         else if (curPnt->direction == 'n'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx + roomLength];
+            curIdx += roomLength;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else if (curPnt->direction == 'e'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx - 1];
+            curIdx -= 1;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else if (curPnt->direction == 's'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx - roomLength];
+            curIdx -= roomLength;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else if (curPnt->direction == 'w'){
-            int a = (int) (curPnt->roomIdx - '0');
-            prevPnt = &(*castle)[a][curPnt->idx + 1];
+            curIdx += 1;
+            prevPnt = &(*castle)[curRoomIdx][curIdx];
         }
         else{
             std::cerr << "failure in back-tracking queue! error in printListQueue!\n";
             exit(1);
         }
         auto *info = new string;
-        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction);
+        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction,curIdx,curRoomIdx);
         // debug
         // printf("%s\n",info->c_str());
         listOutput.push(info);
@@ -528,5 +610,6 @@ void printListQueue(Point* countessPnt, vector<vector<Point>> *castle, const int
         delete e;
         listOutput.pop();
     }
+
 }
 // END QUEUE

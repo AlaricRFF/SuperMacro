@@ -13,8 +13,6 @@ enum Err_t {IllegalInput, LRoomNotLegal, InvalidRow, InvalidCol};
 struct Point{
     char pnt_type = '\0';
     char direction = '\0';
-    char roomIdx = '\0';
-    unsigned int idx = 0;
 };
 struct pos{
     uint32_t idx = 0;

@@ -10,7 +10,7 @@ using std::queue;
 
 
 // UTILITIES
-string pointInfoGen(Point *pnt, const int &roomLength, char curDrc);
+string pointInfoGen(Point *pnt, const int &roomLength, char curDrc,const uint32_t& curIdx, const uint32_t curRoomIdx);
 Point* takeOneDirection(vector<vector<Point>> *castle, const int &curRoomInx, const unsigned int &curPointInx, const char &direction, const int& roomSize);
 // UTILITIES
 
@@ -19,20 +19,22 @@ int PushDecisionStack(Point *nextPossiblePos, int *foundCountess, int *tilesDisc
 Point *
 findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
                 const int &roomLength, const int &roomNum, int *totalTiles, pos *CountessPosition);
-void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength);
+void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength,const pos& countessPosition);
 void printMapStack(Point* countessPnt, vector<vector<Point>> *castle,
-                   const int& roomNum, const int& startRoom, const int& startIdx, const int& roomLength);
-void printListStack(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength);
+                   const int& roomNum, const int& startRoom,
+                   const int& startIdx, const int& roomLength, const pos& countessPosition);
+void printListStack(Point *countessPnt, vector<vector<Point>> *castle, const int &roomLength, const pos &countessLct);
 // END STACK
 
 // BEGIN QUEUE
 int PushDecisionQueue(Point *nextPossiblePos, int *foundCountess, int *tilesDiscovered, queue<Point *> *visitedQueue);
-Point * findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
-                const int &roomLength, const int &roomNum, int *totalTiles);
-void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength);
+Point *
+findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, const int &startRoom, const int &startIdx,
+                const int &roomLength, const int &roomNum, int *totalTiles, pos *countessLct);
+void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength, const pos& countessPosition);
 void printMapQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomNum,
-                   const int& startRoom, const int& startIdx, const int& roomLength);
-void printListQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength);
+                   const int& startRoom, const int& startIdx, const int& roomLength, const pos& countessPosition);
+void printListQueue(Point* countessPnt, vector<vector<Point>> *castle, const int& roomLength,const pos& countessLct);
 // END QUEUE
 
 #endif //SUPERMACRO_ROUTINGNEW_H

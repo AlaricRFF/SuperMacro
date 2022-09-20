@@ -153,26 +153,27 @@ int main(int argc, char *argv[]) {
             return 0;
         }
         if (!listOutputMode) {
-            printMap(&castle, roomNum, roomLength);
-            //printMapStack(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
+            //printMap(&castle, roomNum, roomLength);
+            printMapStack(findCountess, &castle, roomNum, startRoom, startIdx, roomLength,CountessPosition);
         } else{
-            printListStack(findCountess,&castle,roomLength);
+            printListStack(findCountess, &castle, roomLength, CountessPosition);
         }
     }
     else { // queue mode
         int totalTiles = 1;
         queue<Point *> visitedQueue;
-
-        Point *findCountess = findRoute_queue(&visitedQueue, &castle, startRoom, startIdx, roomLength, roomNum, &totalTiles);
+        pos CountessPosition(0,0);
+        Point *findCountess = findRoute_queue(&visitedQueue, &castle, startRoom, startIdx, roomLength, roomNum,
+                                              &totalTiles, &CountessPosition);
         if (findCountess == nullptr) {
             printf("No solution, %d tiles discovered.\n", totalTiles);
             return 0;
         }
         if (!listOutputMode) {
             //printMap(&castle, roomNum, roomLength);
-            printMapQueue(findCountess, &castle, roomNum, startRoom, startIdx, roomLength);
+            printMapQueue(findCountess, &castle, roomNum, startRoom, startIdx, roomLength,CountessPosition);
         } else{
-            printListQueue(findCountess,&castle,roomLength);
+            printListQueue(findCountess,&castle,roomLength,CountessPosition);
         }
     }
 

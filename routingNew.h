@@ -10,7 +10,7 @@ using std::queue;
 
 
 // UTILITIES
-string pointInfoGen(Point *pnt, const int &roomLength, char curDrc,const uint32_t& curIdx, const uint32_t curRoomIdx);
+string pointInfoGen(const int &roomLength, char curDrc,const uint32_t& curIdx, const uint32_t curRoomIdx);
 Point* takeOneDirection(vector<vector<Point>> *castle, const int &curRoomInx, const unsigned int &curPointInx, const char &direction, const int& roomSize);
 // UTILITIES
 

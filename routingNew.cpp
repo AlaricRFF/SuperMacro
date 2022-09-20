@@ -9,7 +9,7 @@
 
 // UTILITIES
 
-string pointInfoGen(Point *pnt, const int &roomLength, char curDrc,
+string pointInfoGen(const int &roomLength, char curDrc,
                     const uint32_t& curIdx, const uint32_t curRoomIdx) {
     if (curDrc - '0' >= 0 && '9' - curDrc >= 0){
         return "(" + std::to_string(curRoomIdx)
@@ -209,7 +209,6 @@ findRoute_stack(stack<Point *> *visitedStack, vector<vector<Point>> *castle, con
 
 
 void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, const int& roomLength, const pos& countessPosition){
-    Point *curPnt = countessLct;
     Point *nextPnt = nullptr;
     uint32_t curIdx = countessPosition.idx;
     uint32_t curRoomIdx = countessPosition.roomIdx;
@@ -250,7 +249,6 @@ void backTrackingCastleStack(vector<vector<Point>> *castle, Point* countessLct, 
         nextToNext = nextPnt->direction;  // the direction after nextPnt should take
         nextPnt->direction = nextDirection; // this is the direction this prev point should take (reason this)
         nextDirection = nextToNext;
-        curPnt = nextPnt; /// update curPnt to the next loop
     }
 }
 
@@ -319,7 +317,7 @@ void printListStack(Point *countessPnt, vector<vector<Point>> *castle, const int
             exit(1);
         }
         auto *info = new string;
-        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction,curIdx,curRoomIdx);
+        *info = pointInfoGen(roomLength, curPnt->direction,curIdx,curRoomIdx);
         // debug
         // printf("%s\n",info->c_str());
         listOutput.push(info);
@@ -487,7 +485,6 @@ findRoute_queue(queue<Point *> *visitedQueue, vector<vector<Point>> *castle, con
 
 void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct,
                              const int& roomLength, const pos& countessPosition){
-    Point *curPnt = countessLct;
     Point *nextPnt = nullptr;
     uint32_t curIdx = countessPosition.idx;
     uint32_t curRoomIdx = countessPosition.roomIdx;
@@ -528,7 +525,6 @@ void backTrackingCastleQueue(vector<vector<Point>> *castle, Point* countessLct,
         nextToNext = nextPnt->direction;  // the direction after nextPnt should take
         nextPnt->direction = nextDirection; // this is the direction this prev point should take (reason this)
         nextDirection = nextToNext;
-        curPnt = nextPnt; /// update curPnt to the next loop
     }
 }
 
@@ -598,7 +594,7 @@ void printListQueue(Point* countessPnt, vector<vector<Point>> *castle,
             exit(1);
         }
         auto *info = new string;
-        *info = pointInfoGen(prevPnt, roomLength, curPnt->direction,curIdx,curRoomIdx);
+        *info = pointInfoGen(roomLength, curPnt->direction,curIdx,curRoomIdx);
         // debug
         // printf("%s\n",info->c_str());
         listOutput.push(info);
